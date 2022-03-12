@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My HTML Document</title>
+    <script crossorigin src="https://unpkg.com/react@17/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@17/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
+    <style>
+        picture {
+            border: 1px solid black;
+            border-radius: 0.5rem;
+            display: flex;
+            flex-direction: column;
+            width: 100px;
+            text-align: center;
+        }
+
+        img {
+            width: 100px;
+            border-radius: 50%;
+        }
+        img.disabled {
+            opacity: 0.3;
+        }
+
+        #addPostForm {
+            display: none;
+            width: 400px;
+            background-color: black;
+        }
+    </style>    
+</head>
+<body>
+    <h1>Posts</h1>
+    <button id="getIUsers">Get Users</button>
+    <div id="app"></div>
+</body>
+<script src="./js/post.js"></script>
+<script type="text/babel">
+    const AddModalPost = _ => {
+        return `
+            <form id="addPostForm">
+                <label for="title">Titulo del post:</label><br>
+                <input type="text" id="title" name="title" value="Title"><br>
+                <label for="title">Contenido del post:</label><br>
+                <input type="text" id="content" name="content" value="Content"><br>
+                <button id="addPostButton">Enviar datos</button>  
+            </form> 
+        `;
+    };
+
+    const AddButtonPost = params => {
+        const { title, id } = params;
+        return `
+            <button id="${id}">${title}</button>
+        `;
+    };
+    const app = document.getElementById('app');
+    const ProfileCard = params => {
+        const frase = 'Hola mundo';
+        const src = `https://randomuser.me/api/portraits/women/${params.id}.jpg`;
+        const { user, title, content } = params;
+
+        return `
+            <picture>
+                <img src="${src}"/> 
+                <span>${user}</span>
+                <h2>${title}</h2> 
+                <p>${content}</p> 
+            </picture>`;
+    };
+    const button = document.getElementById('getIUsers');
+    button.addEventListener('click', (event) => {
+        const myHeaders = new Headers();
+
+        const myInit = { 
+            method: 'GET'
+        };
+        const urlServer = `https://randomuser.me/api/?results=10`;
+        
+
+        fetch(urlServer)
+        .then(response => {
+            return response;
+        }).then(response => {
+            return response.json();
+        }).then(users => {
+            const parsedUsers = users.results.map((user, indexUser) => {
+                return {
+                    user: `${user.name.first} ${user.name.last}`,
+                    title: user.name.title,
+                    id: indexUser,
+                    content: user.email
+                };
+            });
+            parsedUsers.map(post => {
+                app.innerHTML += ProfileCard(post);            
+            })
+        })
+        .catch(error => console.log(error))
+    })
+
+    app.innerHTML += AddButtonPost({ title: 'Add post', id: 'openModalButton' });
+    app.innerHTML += AddModalPost();
+
+    const openModalButton = document.getElementById('openModalButton');
+    const addPostButton = document.getElementById('addPostButton');
+
+    openModalButton.addEventListener('click', (event) => {  
+        const { display } = document.getElementById('addPostForm').style 
+        document.getElementById('addPostForm').style.display = display === 'block' ? 'none' : 'block';
+    });
+
+    addPostButton.addEventListener('click', (event) => {    
+        event.preventDefault();
+        addPost('http://localhost:3000/posts', { id: 8, title: 'Nuevo post Tech4inclution' })
+        .then(data => {
+            console.log(data);
+        })
+        .catch(error => console.log(error));
+    });
+//1.- generar un proyecto de npm(npm init) en la terminal
+//2.- agregar la libreria que necesitamos(json-server, npm i json-server) 
+//3.- iniciar el servidor json con un archivo json que sera mi DB => localhost:3000/resource
+//4.- jugar con las peticiones GET, POST, PUT....
+//5.- pintar cosas en el dom....
+
+</script>
+</html>
